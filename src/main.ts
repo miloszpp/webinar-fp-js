@@ -4,7 +4,7 @@ import { pipe, prop } from "./utils";
 const repository = new CustomerRepository();
 
 const calculateBtnEl = document.getElementById('calculate-btn') as HTMLButtonElement;
-const customerIdInputEl = document.getElementById('customer-id-input') as HTMLSelectElement;
+const customerIdInputEl = document.getElementById('customer-id-input') as HTMLInputElement;
 const customerAgeResultsEl = document.getElementById('customer-age-results') as HTMLParagraphElement;
 
 calculateBtnEl.onclick = () => {
@@ -31,9 +31,7 @@ function getCustomerAgeSafe(idString: string) {
         if (customer !== undefined) {
             if (customer.birthYear !== undefined) {
                 const currentYear = new Date().getFullYear();
-                if (currentYear > customer.birthYear) {
-                    return currentYear - customer.birthYear;
-                }
+                return currentYear - customer.birthYear;
             }
         }
     }
