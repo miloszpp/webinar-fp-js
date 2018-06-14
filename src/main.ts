@@ -1,5 +1,6 @@
 import { CustomerRepository } from "./customer-repository";
-import { pipe, prop } from "./utils";
+import { pipe, prop, parseIntSafe } from "./utils";
+import { flatMap, map } from "./maybe";
 
 const repository = new CustomerRepository();
 
@@ -9,8 +10,10 @@ const customerAgeResultsEl = document.getElementById('customer-age-results') as 
 
 calculateBtnEl.onclick = () => {
     const customerId = customerIdInputEl.value;
-    const age = getCustomerAgePointfree(customerId);
-    customerAgeResultsEl.textContent = `Customer age is: ${age}`;
+    const maybeAge = getCustomerAgePointfree(customerId);
+    maybeAge.do(age => {
+        customerAgeResultsEl.textContent = `Customer age is: ${age}`;
+    });
 };
 
 const findById = repository.findById.bind(repository);
@@ -18,21 +21,21 @@ const calculateAge = currentYear => year => currentYear - year;
 
 const getCustomerAgePointfree =
     pipe(
-        parseInt,
-        findById,
-        prop('birthYear'),
-        calculateAge(new Date().getFullYear())
+        parseIntSafe,
+        flatMap(findById),
+        flatMap(prop('birthYear')),
+        map(calculateAge(new Date().getFullYear()))
     );
 
-function getCustomerAgeSafe(idString: string) {
-    const id = parseInt(idString);
-    if (!isNaN(id)) {
-        const customer = repository.findById(id);
-        if (customer !== undefined) {
-            if (customer.birthYear !== undefined) {
-                const currentYear = new Date().getFullYear();
-                return currentYear - customer.birthYear;
-            }
-        }
-    }
-}
+// function getCustomerAgeSafe(idString: string) {
+//     const id = parseInt(idString);
+//     if (!isNaN(id)) {
+//         const customer = repository.findById(id);
+//         if (customer !== undefined) {
+//             if (customer.birthYear !== undefined) {
+//                 const currentYear = new Date().getFullYear();
+//                 return currentYear - customer.birthYear;
+//             }
+//         }
+//     }
+// }
